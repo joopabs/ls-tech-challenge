@@ -30,6 +30,8 @@ replay_pid*
 *.ipr
 *.iws
 out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
 # Maven specific files
 target/
@@ -41,6 +43,8 @@ buildNumber.properties
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 .gradle-cache/
 
 # Spring Boot specific files
