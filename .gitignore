@@ -1,8 +1,9 @@
 # Compiled class file
 *.class
 
-# Log file
+# Log files
 *.log
+logs/
 
 # BlueJ files
 *.ctxt
@@ -22,3 +23,47 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Maven specific files
+target/
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle specific files
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.gradle-cache/
+
+# Spring Boot specific files
+spring-boot-app.log
+*.pid
+
+# Operating system files (macOS)
+.DS_Store
+
+# Operating system files (Windows)
+Thumbs.db
+
+# Linux/Mac Thumbnail caches
+._*
+
+# IDE-specific (VS Code settings, often used for debugging Spring Boot apps)
+.vscode/
+
+# Other Common Files
+*.swp
+*.bak
+*.tmp
+*.old
+*.orig
+*.rej
+~$*
