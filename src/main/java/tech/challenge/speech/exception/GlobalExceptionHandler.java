@@ -6,7 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import tech.challenge.speech.model.dto.ApiResponse;
+import tech.challenge.speech.model.dto.ApiResponseWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,14 +15,14 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponseWrapper<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(objectError -> objectError instanceof FieldError fieldError
                         ? fieldError.getField() + ": " + fieldError.getDefaultMessage()
                         : objectError.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        ApiResponse<Object> response = new ApiResponse<>(
+        ApiResponseWrapper<Object> response = new ApiResponseWrapper<>(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation failed",
                 null,
@@ -33,8 +33,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(NotFoundException ex) {
-        ApiResponse<Void> response = new ApiResponse<>(
+    public ResponseEntity<ApiResponseWrapper<Void>> handleResourceNotFoundException(NotFoundException ex) {
+        ApiResponseWrapper<Void> response = new ApiResponseWrapper<>(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
                 null,
@@ -43,12 +43,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handle general exceptions.
-     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
-        ApiResponse<Object> response = new ApiResponse<>(
+    public ResponseEntity<ApiResponseWrapper<Object>> handleGeneralException(Exception ex) {
+        ApiResponseWrapper<Object> response = new ApiResponseWrapper<>(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal server error",
                 null,

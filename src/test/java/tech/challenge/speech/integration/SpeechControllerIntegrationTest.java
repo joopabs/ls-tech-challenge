@@ -398,4 +398,22 @@ class SpeechControllerIntegrationTest {
                 .body("status", is(409))
                 .body("message", is("Conflict: ID in path does not match ID in request body"));
     }
+
+    @Test
+    void shouldRetrieveAllSpeeches() {
+        given()
+                .log().all()
+                .when()
+                .get("/api/speeches")
+                .then().log().all()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data", is(notNullValue()))
+                .body("data.size()", greaterThan(0))
+                .body("data[0].author", is(notNullValue()))
+                .body("data[0].content", is(notNullValue()))
+                .body("data[0].speechDate", is(notNullValue()));
+    }
 }

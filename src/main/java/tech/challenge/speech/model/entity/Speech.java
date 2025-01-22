@@ -39,8 +39,7 @@ public class Speech extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Speech speech = (Speech) o;
-        return Objects.equals(getId(), speech.getId()) &&
-                Objects.equals(content, speech.content) &&
+        return Objects.equals(content, speech.content) &&
                 Objects.equals(author, speech.author) &&
                 Objects.equals(keywords, speech.keywords) &&
                 Objects.equals(speechDate, speech.speechDate);
@@ -48,6 +47,6 @@ public class Speech extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), content, author, keywords, speechDate);
+        return Objects.hash(content, author, keywords, speechDate);
     }
 }

@@ -1,6 +1,7 @@
 package tech.challenge.speech.service;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.challenge.speech.exception.NotFoundException;
@@ -19,25 +20,20 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SpeechService {
 
     private final SpeechRepository speechRepository;
 
-    public SpeechService(SpeechRepository speechRepository) {
-        this.speechRepository = speechRepository;
+    public List<SpeechDTO> getAllSpeeches() {
+        List<Speech> speeches = speechRepository.findAll();
+        return SpeechMapper.INSTANCE.toDtoList(speeches);
     }
 
-    public SpeechDTO saveSpeech(SpeechDTO speechDTO) {
-        Speech speechEntity = SpeechMapper.INSTANCE.toEntity(speechDTO);
-        Speech savedSpeech = speechRepository.save(speechEntity);
-        return SpeechMapper.INSTANCE.toDto(savedSpeech);
-    }
-
-    public void deleteSpeech(Long id) {
-        if (!speechRepository.existsById(id)) {
-            throw new NotFoundException("Speech not found with id " + id);
-        }
-        speechRepository.deleteById(id);
+    public SpeechDTO getSpeechById(Long id) {
+        return speechRepository.findById(id)
+                .map(SpeechMapper.INSTANCE::toDto)
+                .orElseThrow(() -> new NotFoundException("Speech not found with id: " + id));
     }
 
     public List<SpeechDTO> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
@@ -57,10 +53,10 @@ public class SpeechService {
         return SpeechMapper.INSTANCE.toDtoList(speeches);
     }
 
-    public SpeechDTO getSpeechById(Long id) {
-        return speechRepository.findById(id)
-                .map(SpeechMapper.INSTANCE::toDto)
-                .orElseThrow(() -> new NotFoundException("Speech not found with id: " + id));
+    public SpeechDTO saveSpeech(SpeechDTO speechDTO) {
+        Speech speechEntity = SpeechMapper.INSTANCE.toEntity(speechDTO);
+        Speech savedSpeech = speechRepository.save(speechEntity);
+        return SpeechMapper.INSTANCE.toDto(savedSpeech);
     }
 
     public SpeechDTO updateSpeech(Long id, @Valid UpdateSpeechDTO updateSpeechDTO) {
@@ -76,5 +72,12 @@ public class SpeechService {
 
         Speech updatedSpeech = speechRepository.save(existingSpeech);
         return SpeechMapper.INSTANCE.toDto(updatedSpeech);
+    }
+
+    public void deleteSpeech(Long id) {
+        if (!speechRepository.existsById(id)) {
+            throw new NotFoundException("Speech not found with id " + id);
+        }
+        speechRepository.deleteById(id);
     }
 }
