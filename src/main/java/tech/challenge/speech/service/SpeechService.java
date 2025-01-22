@@ -29,7 +29,7 @@ public class SpeechService {
         return SpeechMapper.INSTANCE.toDto(savedSpeech);
     }
 
-    public List<Speech> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
+    public List<SpeechDTO> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
         final List<Speech> speeches = speechRepository.findAll(
                 SpeechSpecification.filterSpeeches(author, snippet, startDate, endDate, keywords)
         );
@@ -38,6 +38,6 @@ public class SpeechService {
             throw new NotFoundException("No speeches found matching the search criteria");
         }
 
-        return speeches;
+        return SpeechMapper.INSTANCE.toDtoList(speeches);
     }
 }
