@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -13,11 +14,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "speech")
-public class Speech {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Speech extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -33,12 +30,16 @@ public class Speech {
     @Column(name = "speech_date", nullable = false)
     private OffsetDateTime speechDate;
 
+    public OffsetDateTime getSpeechDate() {
+        return speechDate != null ? speechDate.withOffsetSameInstant(ZoneOffset.UTC) : null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Speech speech = (Speech) o;
-        return Objects.equals(id, speech.id) &&
+        return Objects.equals(getId(), speech.getId()) &&
                 Objects.equals(content, speech.content) &&
                 Objects.equals(author, speech.author) &&
                 Objects.equals(keywords, speech.keywords) &&
@@ -47,6 +48,6 @@ public class Speech {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, content, author, keywords, speechDate);
+        return Objects.hash(getId(), content, author, keywords, speechDate);
     }
 }

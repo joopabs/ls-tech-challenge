@@ -1,9 +1,11 @@
 CREATE TABLE speech
 (
-    id          BIGSERIAL PRIMARY KEY,
-    content     TEXT         NOT NULL,
-    author      VARCHAR(255) NOT NULL,
-    speech_date TIMESTAMPTZ  NOT NULL
+    id               BIGSERIAL PRIMARY KEY,
+    content          TEXT         NOT NULL,
+    author           VARCHAR(255) NOT NULL,
+    speech_date      TIMESTAMPTZ  NOT NULL,
+    create_date_time TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_date_time TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE speech_keyword

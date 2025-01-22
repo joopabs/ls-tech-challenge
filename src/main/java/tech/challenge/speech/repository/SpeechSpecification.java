@@ -32,14 +32,15 @@ public class SpeechSpecification {
     }
 
     private static Predicate buildAuthorPredicate(String author, Root<Speech> speech, CriteriaBuilder builder) {
-        return author != null ? builder.equal(speech.get("author"), author) : null;
+        return author != null
+                ? builder.equal(builder.upper(speech.get("author")), author.toUpperCase())
+                : null;
     }
 
     private static Predicate buildSnippetPredicate(String snippet, Root<Speech> speech, CriteriaBuilder builder) {
-        return snippet != null ? builder.like(
-                builder.upper(speech.get("content")),
-                WILDCARD + snippet.toUpperCase() + WILDCARD
-        ) : null;
+        return snippet != null
+                ? builder.like(builder.upper(speech.get("content")), WILDCARD + snippet.toUpperCase() + WILDCARD)
+                : null;
     }
 
     private static Predicate buildKeywordsPredicate(Set<String> keywords, Root<Speech> speech, CriteriaBuilder builder) {
@@ -54,6 +55,8 @@ public class SpeechSpecification {
     }
 
     private static Predicate buildDateRangePredicate(OffsetDateTime startDate, OffsetDateTime endDate, Root<Speech> speech, CriteriaBuilder builder) {
-        return (startDate != null && endDate != null) ? builder.between(speech.get("speechDate"), startDate, endDate) : null;
+        return (startDate != null && endDate != null)
+                ? builder.between(speech.get("speechDate"), startDate, endDate)
+                : null;
     }
 }
