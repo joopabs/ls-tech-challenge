@@ -1,0 +1,17 @@
+<configuration>
+    <!-- Console Appender for Test Output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %highlight(%d{yyyy-MM-dd HH:mm:ss} [%thread] [%-5level] %logger{36}) - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger with Console Only -->
+    <root level="info">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="tech.challenge.speech" level="debug" />
+</configuration>

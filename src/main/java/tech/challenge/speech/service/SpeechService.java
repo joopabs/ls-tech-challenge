@@ -2,6 +2,7 @@ package tech.challenge.speech.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.challenge.speech.exception.NotFoundException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -47,6 +49,7 @@ public class SpeechService {
         );
 
         if (speeches.isEmpty()) {
+            log.warn("No speeches found matching the search criteria");
             throw new NotFoundException("No speeches found matching the search criteria");
         }
 
@@ -76,6 +79,7 @@ public class SpeechService {
 
     public void deleteSpeech(Long id) {
         if (!speechRepository.existsById(id)) {
+            log.warn("Speech not found with id {}", id);
             throw new NotFoundException("Speech not found with id " + id);
         }
         speechRepository.deleteById(id);
