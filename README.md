@@ -64,9 +64,6 @@ Ensure the application is correctly configured to connect to the database.
        url: jdbc:postgresql://localhost:5432/app_db
        username: app_user
        password: Beyond80.Bucks
-     jpa:
-       hibernate:
-         ddl-auto: update
    ```
 2. If you modified ports or credentials in the `docker-compose.yml` file, update them in this configuration file as well.
 
@@ -94,7 +91,38 @@ You can now run the application locally using **Gradle**.
 
 ---
 
-#### Step 5: Access the Application
+#### Step 5: Run Tests
+This project includes REST Assured tests to verify the functionality of the REST APIs along with a Testcontainer instance of PostgreSQL.
+
+**Using IntelliJ IDEA:**
+1. Open the project in IntelliJ IDEA.
+2. Navigate to the test classes, usually located in `src/test/java`.
+3. Right-click on the test file or folder containing the tests (e.g., `SpeechControllerIntegrationTest`) and select **Run 'Tests'**.
+
+**Using Gradle Wrapper (Command Line):**
+1. Run the following command to execute all tests in the project:
+   - On **Linux/Mac**:
+     ```bash
+     ./gradlew test
+     ```
+   - On **Windows**:
+     ```bash
+     gradlew.bat test
+     ```
+
+   This will automatically execute the REST Assured tests as part of the Gradle test task.
+
+**Viewing Test Results:**
+1. **In IntelliJ IDEA:** After running the tests, check the run window for results showing which tests passed or failed.
+2. **In Command Line:** Gradle will output a summary of test results in the terminal. You can also review the detailed test reports, which are typically located at:
+   ```bash
+   build/reports/tests/test/index.html
+   ```
+   Open this file in your browser for a detailed summary.
+
+---
+
+#### Step 6: Access the Application
 Once the application starts, it will be accessible at:
 - **URL**: `http://localhost:8080`
 
