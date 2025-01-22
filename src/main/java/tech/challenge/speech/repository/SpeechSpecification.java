@@ -33,7 +33,7 @@ public class SpeechSpecification {
 
     private static Predicate buildAuthorPredicate(String author, Root<Speech> speech, CriteriaBuilder builder) {
         return author != null
-                ? builder.equal(builder.upper(speech.get("author")), author.toUpperCase())
+                ? builder.like(builder.upper(speech.get("author")), author.toUpperCase() + WILDCARD)
                 : null;
     }
 

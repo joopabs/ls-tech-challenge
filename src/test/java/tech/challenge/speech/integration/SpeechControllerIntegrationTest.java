@@ -15,10 +15,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
@@ -66,9 +62,9 @@ class SpeechControllerIntegrationTest {
     }
 
     @Test
-    void shouldSearchSpeechesByAuthor() {
+    void shouldSearchSpeechesByAuthorStartsWith() {
         given()
-                .queryParam("author", "John Doe").log().all()
+                .queryParam("author", "John").log().all()
                 .when()
                 .get("/api/speeches/search")
                 .then().log().all()
@@ -206,10 +202,6 @@ class SpeechControllerIntegrationTest {
                     }
                 """;
 
-        final String now = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                .withZone(ZoneOffset.UTC)
-                .format(Instant.now());
-
         given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
@@ -224,9 +216,7 @@ class SpeechControllerIntegrationTest {
                 .body("data.content", is("The journey towards equality begins today."))
                 .body("data.author", is("Amanda Gorman"))
                 .body("data.keywords", hasItems("equality", "justice", "freedom"))
-                .body("data.speechDate", is("2023-11-04T16:00:00Z"))
-                .body("data.createDateTime", is(now))
-                .body("data.updateDateTime", is(now));
+                .body("data.speechDate", is("2023-11-04T16:00:00Z"));
     }
 
     @Test

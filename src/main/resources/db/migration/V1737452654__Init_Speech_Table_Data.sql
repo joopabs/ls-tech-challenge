@@ -8,12 +8,18 @@ CREATE TABLE speech
     update_date_time TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX idx_speech_content_fulltext ON speech USING gin(to_tsvector('english', content));
+CREATE INDEX idx_speech_author_partial ON speech (author text_pattern_ops);
+CREATE INDEX idx_speech_speech_date ON speech (speech_date);
+
 CREATE TABLE speech_keyword
 (
     speech_id BIGINT       NOT NULL REFERENCES speech (id) ON DELETE CASCADE,
     keyword   VARCHAR(255) NOT NULL,
     PRIMARY KEY (speech_id, keyword)
 );
+
+CREATE INDEX idx_speech_keyword_keyword ON speech_keyword (keyword);
 
 -- Insert seed data into the speech table
 INSERT INTO speech (content, author, speech_date)
