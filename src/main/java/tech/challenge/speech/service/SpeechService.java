@@ -2,7 +2,7 @@ package tech.challenge.speech.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.challenge.speech.entity.Speech;
+import tech.challenge.speech.model.entity.Speech;
 import tech.challenge.speech.repository.SpeechRepository;
 import tech.challenge.speech.repository.SpeechSpecification;
 

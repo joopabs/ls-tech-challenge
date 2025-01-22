@@ -1,4 +1,4 @@
-package tech.challenge.speech.entity;
+package tech.challenge.speech.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

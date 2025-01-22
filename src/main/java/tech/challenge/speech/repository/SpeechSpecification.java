@@ -4,7 +4,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
-import tech.challenge.speech.entity.Speech;
+import tech.challenge.speech.model.entity.Speech;
 
 import java.time.OffsetDateTime;
 import java.util.List;
