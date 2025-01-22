@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class SpeechDTO {
@@ -32,4 +33,14 @@ public class SpeechDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private OffsetDateTime updateDateTime;
+
+    public void setKeywords(Set<String> keywords) {
+        if (keywords != null) {
+            this.keywords = keywords.stream()
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+        } else {
+            this.keywords = null;
+        }
+    }
 }

@@ -10,8 +10,10 @@ import tech.challenge.speech.repository.SpeechRepository;
 import tech.challenge.speech.repository.SpeechSpecification;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,8 +32,13 @@ public class SpeechService {
     }
 
     public List<SpeechDTO> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
+        // make keyword search case-insensitive
+        final Set<String> lowerCaseKeywords = (keywords == null)
+                ? Collections.emptySet()
+                : keywords.stream().map(String::toLowerCase).collect(Collectors.toSet());
+
         final List<Speech> speeches = speechRepository.findAll(
-                SpeechSpecification.filterSpeeches(author, snippet, startDate, endDate, keywords)
+                SpeechSpecification.filterSpeeches(author, snippet, startDate, endDate, lowerCaseKeywords)
         );
 
         if (speeches.isEmpty()) {

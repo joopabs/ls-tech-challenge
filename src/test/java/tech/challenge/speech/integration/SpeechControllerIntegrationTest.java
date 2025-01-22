@@ -96,10 +96,26 @@ class SpeechControllerIntegrationTest {
     }
 
     @Test
-    void shouldSearchSpeechesByDateRange() {
+    void shouldSearchSpeechesByDateRangeUTC() {
         given()
-                .queryParam("startDate", "2023-01-01T00:00:00Z")
-                .queryParam("endDate", "2023-02-28T23:59:59Z").log().all()
+                .queryParam("startDate", "2023-01-01T10:00:00Z")
+                .queryParam("endDate", "2023-02-15T15:30:00Z").log().all()
+                .when()
+                .get("/api/speeches/search")
+                .then().log().all()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(2)) // Speech1 and Speech2 from seed data are within this date range
+                .body("data.author", hasItems("John Doe", "Jane Smith"));
+    }
+
+    @Test
+    void shouldSearchSpeechesByDateRangeUTCPlus8() {
+        given()
+                .queryParam("startDate", "2023-01-01T18:00:00+08:00")
+                .queryParam("endDate", "2023-02-15T23:30:00+08:00").log().all()
                 .when()
                 .get("/api/speeches/search")
                 .then().log().all()
@@ -114,7 +130,7 @@ class SpeechControllerIntegrationTest {
     @Test
     void shouldSearchSpeechesByKeywords() {
         given()
-                .queryParam("keywords", "economy,freedom").log().all() // Send keywords as a comma-separated list
+                .queryParam("keywords", "RIGHTS,Peace").log().all() // Send keywords as a comma-separated list
                 .when()
                 .get("/api/speeches/search")
                 .then().log().all()
@@ -125,7 +141,6 @@ class SpeechControllerIntegrationTest {
                 .body("data.size()", is(2)) // Assert that 2 results were returned
                 .body("data.content", hasItems("Human rights are non-negotiable", "Economic stability is key to peace"));
     }
-
 
     @Test
     void shouldSearchSpeechesByAuthorAndKeywords() {
