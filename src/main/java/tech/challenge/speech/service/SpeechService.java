@@ -1,10 +1,12 @@
 package tech.challenge.speech.service;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.challenge.speech.exception.NotFoundException;
 import tech.challenge.speech.mapper.SpeechMapper;
 import tech.challenge.speech.model.dto.SpeechDTO;
+import tech.challenge.speech.model.dto.UpdateSpeechDTO;
 import tech.challenge.speech.model.entity.Speech;
 import tech.challenge.speech.repository.SpeechRepository;
 import tech.challenge.speech.repository.SpeechSpecification;
@@ -59,5 +61,20 @@ public class SpeechService {
         return speechRepository.findById(id)
                 .map(SpeechMapper.INSTANCE::toDto)
                 .orElseThrow(() -> new NotFoundException("Speech not found with id: " + id));
+    }
+
+    public SpeechDTO updateSpeech(Long id, @Valid UpdateSpeechDTO updateSpeechDTO) {
+        Speech existingSpeech = speechRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Speech not found with id: " + id));
+
+        existingSpeech.setContent(updateSpeechDTO.getContent());
+        existingSpeech.setAuthor(updateSpeechDTO.getAuthor());
+        existingSpeech.setSpeechDate(updateSpeechDTO.getSpeechDate());
+        existingSpeech.setKeywords(updateSpeechDTO.getKeywords());
+
+        existingSpeech.setUpdateDateTime(OffsetDateTime.now());
+
+        Speech updatedSpeech = speechRepository.save(existingSpeech);
+        return SpeechMapper.INSTANCE.toDto(updatedSpeech);
     }
 }

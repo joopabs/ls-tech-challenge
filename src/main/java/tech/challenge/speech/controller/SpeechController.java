@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.challenge.speech.model.dto.ApiResponse;
 import tech.challenge.speech.model.dto.SpeechDTO;
+import tech.challenge.speech.model.dto.UpdateSpeechDTO;
 import tech.challenge.speech.service.SpeechService;
 
 import java.time.OffsetDateTime;
@@ -56,6 +57,33 @@ public class SpeechController {
                 savedDTO,
                 null),
                 HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<SpeechDTO>> updateSpeech(
+            @PathVariable Long id, @Valid @RequestBody UpdateSpeechDTO updateSpeechDTO) {
+
+        // Check if the path ID matches the body ID
+        if (!id.equals(updateSpeechDTO.getId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    new ApiResponse<>(
+                            HttpStatus.CONFLICT.value(),
+                            "Conflict: ID in path does not match ID in request body",
+                            null,
+                            null
+                    )
+            );
+        }
+
+        SpeechDTO updatedSpeech = speechService.updateSpeech(id, updateSpeechDTO);
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Speech updated successfully",
+                        updatedSpeech,
+                        null
+                )
+        );
     }
 
     @DeleteMapping("/{id}")

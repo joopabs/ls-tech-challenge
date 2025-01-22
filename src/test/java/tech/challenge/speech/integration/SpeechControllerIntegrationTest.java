@@ -248,7 +248,7 @@ class SpeechControllerIntegrationTest {
                 .log().all()
                 .when()
                 .get("/api/speeches/{id}", 1)
-                .then() .log().all()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
@@ -266,7 +266,7 @@ class SpeechControllerIntegrationTest {
                 .log().all()
                 .when()
                 .get("/api/speeches/{id}", 9999) // Assuming 9999 does not exist
-                .then() .log().all()
+                .then().log().all()
                 .statusCode(404)
                 .contentType(ContentType.JSON)
                 .body("status", is(404))
@@ -297,5 +297,105 @@ class SpeechControllerIntegrationTest {
                 .statusCode(404)
                 .body("status", is(404))
                 .body("message", is("Speech not found with id: 4"));
+    }
+
+    @Test
+    void shouldUpdateSpeechSuccessfully() {
+        String updateRequestBody = """
+                    {
+                        "id": 5,
+                        "content": "Updated content for the speech",
+                        "author": "Updated Author",
+                        "keywords": ["updated", "speech", "keywords"],
+                        "speechDate": "2023-11-10T10:00:00Z"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(updateRequestBody).log().all()
+                .when()
+                .put("/api/speeches/{id}", 5)
+                .then().log().all()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("status", is(200))
+                .body("message", is("Speech updated successfully"))
+                .body("data.id", is(5))
+                .body("data.content", is("Updated content for the speech"))
+                .body("data.author", is("Updated Author"))
+                .body("data.speechDate", is("2023-11-10T10:00:00Z"))
+                .body("data.keywords", hasItems("updated", "speech", "keywords"));
+    }
+
+    @Test
+    void updateShouldReturnNotFoundForNonexistentSpeech() {
+        String updateRequestBody = """
+                    {
+                        "id": 9999,
+                        "content": "Some content",
+                        "author": "Some Author",
+                        "keywords": ["nonexistent", "speech"],
+                        "speechDate": "2023-11-10T10:00:00Z"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(updateRequestBody).log().all()
+                .when()
+                .put("/api/speeches/{id}", 9999)
+                .then().log().all()
+                .statusCode(404)
+                .contentType(ContentType.JSON)
+                .body("status", is(404))
+                .body("message", is("Speech not found with id: 9999"));
+    }
+
+    @Test
+    void updateShouldReturnBadRequestForMissingRequiredFields() {
+        String invalidRequestBody = """
+                    {
+                        "id": 5,
+                        "author": "Updated Author"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequestBody).log().all()
+                .when()
+                .put("/api/speeches/{id}", 5)
+                .then().log().all()
+                .statusCode(400)
+                .contentType(ContentType.JSON)
+                .body("status", is(400))
+                .body("message", is("Validation failed"))
+                .body("errors", notNullValue())
+                .body("errors", hasItem(containsString("content")));
+    }
+
+    @Test
+    void updateShouldReturnConflictWhenIdInPathDoesNotMatchRequestBody() {
+        String conflictingIdRequestBody = """
+                    {
+                        "id": 5,
+                        "content": "Conflicting ID test speech content",
+                        "author": "Author with Conflict",
+                        "keywords": ["conflict", "test"],
+                        "speechDate": "2023-11-20T15:00:00Z"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(conflictingIdRequestBody).log().all()
+                .when()
+                .put("/api/speeches/{id}", 6)
+                .then().log().all()
+                .statusCode(409)
+                .contentType(ContentType.JSON)
+                .body("status", is(409))
+                .body("message", is("Conflict: ID in path does not match ID in request body"));
     }
 }
