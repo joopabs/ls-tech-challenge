@@ -2,6 +2,9 @@ package tech.challenge.speech.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.challenge.speech.exception.NotFoundException;
+import tech.challenge.speech.mapper.SpeechMapper;
+import tech.challenge.speech.model.dto.SpeechDTO;
 import tech.challenge.speech.model.entity.Speech;
 import tech.challenge.speech.repository.SpeechRepository;
 import tech.challenge.speech.repository.SpeechSpecification;
@@ -20,9 +23,21 @@ public class SpeechService {
         this.speechRepository = speechRepository;
     }
 
+    public SpeechDTO saveSpeech(SpeechDTO speechDTO) {
+        Speech speechEntity = SpeechMapper.INSTANCE.toEntity(speechDTO);
+        Speech savedSpeech = speechRepository.save(speechEntity);
+        return SpeechMapper.INSTANCE.toDto(savedSpeech);
+    }
+
     public List<Speech> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
-        return speechRepository.findAll(
+        final List<Speech> speeches = speechRepository.findAll(
                 SpeechSpecification.filterSpeeches(author, snippet, startDate, endDate, keywords)
         );
+
+        if (speeches.isEmpty()) {
+            throw new NotFoundException("No speeches found matching the search criteria");
+        }
+
+        return speeches;
     }
 }

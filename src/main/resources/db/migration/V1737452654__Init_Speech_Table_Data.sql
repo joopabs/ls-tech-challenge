@@ -14,10 +14,10 @@ CREATE TABLE speech_keyword
 );
 
 -- Insert seed data into the speech table
-INSERT INTO speech (id, content, author, speech_date)
-VALUES (1, 'Equality and justice for all', 'John Doe', '2023-01-01T10:00:00Z'),
-       (2, 'Human rights are non-negotiable', 'Jane Smith', '2023-02-15T15:30:00Z'),
-       (3, 'Economic stability is key to peace', 'John Doe', '2023-03-10T12:00:00Z');
+INSERT INTO speech (content, author, speech_date)
+VALUES ('Equality and justice for all', 'John Doe', '2023-01-01T10:00:00Z'),
+       ('Human rights are non-negotiable', 'Jane Smith', '2023-02-15T15:30:00Z'),
+       ('Economic stability is key to peace', 'John Doe', '2023-03-10T12:00:00Z');
 
 -- Insert seed data into the speech_keyword table
 INSERT INTO speech_keyword (speech_id, keyword)

@@ -1,10 +1,12 @@
 package tech.challenge.speech.controller;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import tech.challenge.speech.model.dto.ApiResponse;
+import tech.challenge.speech.model.dto.SpeechDTO;
 import tech.challenge.speech.model.entity.Speech;
 import tech.challenge.speech.service.SpeechService;
 
@@ -14,16 +16,13 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/speeches")
+@RequiredArgsConstructor
 public class SpeechController {
 
     private final SpeechService speechService;
 
-    public SpeechController(SpeechService speechService) {
-        this.speechService = speechService;
-    }
-
     @GetMapping("/search")
-    public ResponseEntity<List<Speech>> searchSpeeches(
+    public ResponseEntity<ApiResponse<List<Speech>>> searchSpeeches(
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String snippet,
             @RequestParam(required = false) OffsetDateTime startDate,
@@ -31,6 +30,21 @@ public class SpeechController {
             @RequestParam(required = false) Set<String> keywords
     ) {
         List<Speech> speeches = speechService.searchSpeeches(author, snippet, startDate, endDate, keywords);
-        return ResponseEntity.ok(speeches);
+        return ResponseEntity.ok(new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Speeches retrieved successfully",
+                speeches,
+                null));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<SpeechDTO>> createSpeech(@Valid @RequestBody SpeechDTO speechDTO) {
+        SpeechDTO savedDTO = speechService.saveSpeech(speechDTO);
+        return new ResponseEntity<>(new ApiResponse<>(
+                HttpStatus.CREATED.value(),
+                "Speech created successfully",
+                savedDTO,
+                null),
+                HttpStatus.CREATED);
     }
 }

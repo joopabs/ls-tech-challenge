@@ -16,8 +16,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -65,54 +64,62 @@ class SpeechControllerIntegrationTest {
     @Test
     void shouldSearchSpeechesByAuthor() {
         given()
-                .queryParam("author", "John Doe")
+                .queryParam("author", "John Doe").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(2)) // 2 speeches from seed data authored by John Doe
-                .body("content", hasItems("Equality and justice for all", "Economic stability is key to peace"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(2)) // 2 speeches from seed data authored by John Doe
+                .body("data.content", hasItems("Equality and justice for all", "Economic stability is key to peace"));
     }
 
     @Test
     void shouldSearchSpeechesBySnippet() {
         given()
-                .queryParam("snippet", "rights")
+                .queryParam("snippet", "rights").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(1)) // Speech 2 from seed data contains "rights"
-                .body("author[0]", is("Jane Smith"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(1)) // Speech 2 from seed data contains "rights"
+                .body("data[0].author", is("Jane Smith"));
     }
 
     @Test
     void shouldSearchSpeechesByDateRange() {
         given()
                 .queryParam("startDate", "2023-01-01T00:00:00Z")
-                .queryParam("endDate", "2023-02-28T23:59:59Z")
+                .queryParam("endDate", "2023-02-28T23:59:59Z").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(2)) // Speech1 and Speech2 from seed data are within this date range
-                .body("author", hasItems("John Doe", "Jane Smith"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(2)) // Speech1 and Speech2 from seed data are within this date range
+                .body("data.author", hasItems("John Doe", "Jane Smith"));
     }
 
     @Test
     void shouldSearchSpeechesByKeywords() {
         given()
-                .queryParam("keywords", "economy,freedom") // Send keywords as a comma-separated list
+                .queryParam("keywords", "economy,freedom").log().all() // Send keywords as a comma-separated list
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(2)) // Assert that 2 results were returned
-                .body("content", hasItems("Human rights are non-negotiable", "Economic stability is key to peace"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(2)) // Assert that 2 results were returned
+                .body("data.content", hasItems("Human rights are non-negotiable", "Economic stability is key to peace"));
     }
 
 
@@ -120,16 +127,18 @@ class SpeechControllerIntegrationTest {
     void shouldSearchSpeechesByAuthorAndKeywords() {
         given()
                 .queryParam("author", "John Doe")
-                .queryParam("keywords", "economy")
+                .queryParam("keywords", "economy").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(1)) // Only one speech matches both criteria
-                .body("content[0]", is("Economic stability is key to peace"))
-                .body("author[0]", is("John Doe"))
-                .body("keywords[0]", hasItems("economy", "peace"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(1)) // Assert that 2 results were returned
+                .body("data[0].content", is("Economic stability is key to peace"))
+                .body("data[0].author", is("John Doe"))
+                .body("data[0].keywords", hasItems("economy", "peace"));
     }
 
     @Test
@@ -139,28 +148,82 @@ class SpeechControllerIntegrationTest {
                 .queryParam("snippet", "justice")
                 .queryParam("startDate", "2023-01-01T00:00:00Z")
                 .queryParam("endDate", "2023-01-02T23:59:59Z")
-                .queryParam("keywords", "equality,justice")
+                .queryParam("keywords", "equality,justice").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
+                .then().log().all()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(1)) // Only one speech matches both criteria
-                .body("author[0]", is("John Doe"))
-                .body("content[0]", is("Equality and justice for all"))
-                .body("speechDate[0]", is("2023-01-01T10:00:00Z"))
-                .body("keywords[0]", hasItems("equality", "justice"));
+                .body("status", is(200))
+                .body("message", is("Speeches retrieved successfully"))
+                .body("data.size()", is(1)) // Only one speech matches both criteria
+                .body("data[0].author", is("John Doe"))
+                .body("data[0].content", is("Equality and justice for all"))
+                .body("data[0].speechDate", is("2023-01-01T10:00:00Z"))
+                .body("data[0].keywords", hasItems("equality", "justice"));
     }
 
     @Test
     void shouldReturnEmptyWhenNoResultsFound() {
         given()
-                .queryParam("author", "Nonexistent Author")
+                .queryParam("author", "Nonexistent Author").log().all()
                 .when()
                 .get("/api/speeches/search")
-                .then()
-                .statusCode(200)
+                .then().log().all()
+                .statusCode(404)
                 .contentType(ContentType.JSON)
-                .body("$.size()", is(0)); // Assert that no results were found
+                .body("status", is(404)) // Verify that status matches HTTP 201
+                .body("message", is("No speeches found matching the search criteria"));
+    }
+
+    @Test
+    void shouldCreateSpeechSuccessfully() {
+        String requestBody = """
+                    {
+                        "content": "The journey towards equality begins today.",
+                        "author": "Amanda Gorman",
+                        "keywords": ["equality", "justice", "freedom"],
+                        "speechDate": "2023-11-05T15:30:00Z"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("/api/speeches")
+                .then().log().all()
+                .statusCode(201)
+                .contentType(ContentType.JSON)
+                .body("status", is(201)) // Verify that status matches HTTP 201
+                .body("message", is("Speech created successfully"))
+                .body("data.id", is(notNullValue()))
+                .body("data.content", is("The journey towards equality begins today."))
+                .body("data.author", is("Amanda Gorman"))
+                .body("data.keywords", hasItems("equality", "justice", "freedom"))
+                .body("data.speechDate", is("2023-11-05T15:30:00Z"));
+    }
+
+    @Test
+    void shouldReturnBadRequestForMissingRequiredFields() {
+        String invalidRequestBody = """
+                    {
+                        "author": "Amanda Gorman"
+                    }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(invalidRequestBody)
+                .when()
+                .post("/api/speeches")
+                .then().log().all()
+                .statusCode(400) // HTTP 400 Bad Request
+                .contentType(ContentType.JSON)
+                .body("status", is(400))
+                .body("message", is("Validation failed"))
+                .body("data", is(nullValue()))
+                .body("errors", notNullValue())
+                .body("errors", hasItem(containsString("content")));
     }
 }
