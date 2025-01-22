@@ -26,7 +26,6 @@ class SpeechControllerIntegrationTest {
     @LocalServerPort
     private int port;
 
-    // Define the PostgreSQL container
     @Container
     static PostgreSQLContainer<?> postgresContainer;
 
@@ -204,7 +203,7 @@ class SpeechControllerIntegrationTest {
 
         given()
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(requestBody).log().all()
                 .when()
                 .post("/api/speeches")
                 .then().log().all()
@@ -229,7 +228,7 @@ class SpeechControllerIntegrationTest {
 
         given()
                 .contentType(ContentType.JSON)
-                .body(invalidRequestBody)
+                .body(invalidRequestBody).log().all()
                 .when()
                 .post("/api/speeches")
                 .then().log().all()
@@ -240,5 +239,63 @@ class SpeechControllerIntegrationTest {
                 .body("data", is(nullValue()))
                 .body("errors", notNullValue())
                 .body("errors", hasItem(containsString("content")));
+    }
+
+    @Test
+    void shouldRetrieveSpeechByIdSuccessfully() {
+        // Assume speech with ID 1 exists in the database.
+        given()
+                .log().all()
+                .when()
+                .get("/api/speeches/{id}", 1)
+                .then() .log().all()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("status", is(200))
+                .body("message", is("Speech retrieved successfully"))
+                .body("data.id", is(1))
+                .body("data.content", is("Equality and justice for all"))
+                .body("data.author", is("John Doe"))
+                .body("data.keywords", hasItems("equality", "justice"))
+                .body("data.speechDate", is("2023-01-01T10:00:00Z"));
+    }
+
+    @Test
+    void shouldReturnNotFoundForNonexistentSpeech() {
+        given()
+                .log().all()
+                .when()
+                .get("/api/speeches/{id}", 9999) // Assuming 9999 does not exist
+                .then() .log().all()
+                .statusCode(404)
+                .contentType(ContentType.JSON)
+                .body("status", is(404))
+                .body("message", is("Speech not found with id: 9999"));
+    }
+
+    @Test
+    void shouldDeleteSpeechSuccessfully() {
+        // Delete speech with ID = 4
+        given()
+                .log().all()
+                .when()
+                .delete("/api/speeches/{id}", 4)
+                .then()
+                .log().all()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("status", is(200))
+                .body("message", is("Speech deleted successfully"));
+
+        // Verify the speech no longer exists
+        given()
+                .log().all()
+                .when()
+                .get("/api/speeches/{id}", 4)
+                .then()
+                .log().all()
+                .statusCode(404)
+                .body("status", is(404))
+                .body("message", is("Speech not found with id: 4"));
     }
 }

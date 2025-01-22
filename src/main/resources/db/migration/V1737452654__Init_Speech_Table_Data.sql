@@ -25,7 +25,8 @@ CREATE INDEX idx_speech_keyword_keyword ON speech_keyword (keyword);
 INSERT INTO speech (content, author, speech_date)
 VALUES ('Equality and justice for all', 'John Doe', '2023-01-01T10:00:00Z'),
        ('Human rights are non-negotiable', 'Jane Smith', '2023-02-15T15:30:00Z'),
-       ('Economic stability is key to peace', 'John Doe', '2023-03-10T12:00:00Z');
+       ('Economic stability is key to peace', 'John Doe', '2023-03-10T12:00:00Z'),
+       ('Climate action is our responsibility', 'Alice Johnson', '2023-04-20T09:00:00Z');
 
 -- Insert seed data into the speech_keyword table
 INSERT INTO speech_keyword (speech_id, keyword)
@@ -34,4 +35,7 @@ VALUES (1, 'equality'),
        (2, 'rights'),
        (2, 'freedom'),
        (3, 'economy'),
-       (3, 'peace');
+       (3, 'peace'),
+       (4, 'climate'),
+       (4, 'action'),
+       (4, 'responsibility');

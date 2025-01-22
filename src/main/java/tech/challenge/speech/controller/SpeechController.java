@@ -20,6 +20,17 @@ public class SpeechController {
 
     private final SpeechService speechService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SpeechDTO>> getSpeechById(@PathVariable Long id) {
+        SpeechDTO speech = speechService.getSpeechById(id);
+        return ResponseEntity.ok(new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Speech retrieved successfully",
+                speech,
+                null
+        ));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<SpeechDTO>>> searchSpeeches(
             @RequestParam(required = false) String author,
@@ -45,5 +56,15 @@ public class SpeechController {
                 savedDTO,
                 null),
                 HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteSpeech(@PathVariable Long id) {
+        speechService.deleteSpeech(id);
+        return ResponseEntity.ok(new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Speech deleted successfully",
+                null,
+                null));
     }
 }

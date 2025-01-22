@@ -31,6 +31,13 @@ public class SpeechService {
         return SpeechMapper.INSTANCE.toDto(savedSpeech);
     }
 
+    public void deleteSpeech(Long id) {
+        if (!speechRepository.existsById(id)) {
+            throw new NotFoundException("Speech not found with id " + id);
+        }
+        speechRepository.deleteById(id);
+    }
+
     public List<SpeechDTO> searchSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
         // make keyword search case-insensitive
         final Set<String> lowerCaseKeywords = (keywords == null)
@@ -46,5 +53,11 @@ public class SpeechService {
         }
 
         return SpeechMapper.INSTANCE.toDtoList(speeches);
+    }
+
+    public SpeechDTO getSpeechById(Long id) {
+        return speechRepository.findById(id)
+                .map(SpeechMapper.INSTANCE::toDto)
+                .orElseThrow(() -> new NotFoundException("Speech not found with id: " + id));
     }
 }
