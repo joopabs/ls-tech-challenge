@@ -1,11 +1,8 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:app_db
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:tc:postgresql:15-alpine:///app_db
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
   flyway:
-    enabled: false
+    enabled: true
