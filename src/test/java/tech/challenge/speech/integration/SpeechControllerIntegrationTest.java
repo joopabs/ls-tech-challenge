@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static tech.challenge.speech.common.Constants.*;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -70,7 +71,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(2)) // 2 speeches from seed data authored by John Doe
                 .body("data.content", hasItems("Equality and justice for all", "Economic stability is key to peace"));
     }
@@ -85,7 +86,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(1)) // Speech 2 from seed data contains "rights"
                 .body("data[0].author", is("Jane Smith"));
     }
@@ -101,7 +102,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(2)) // Speech1 and Speech2 from seed data are within this date range
                 .body("data.author", hasItems("John Doe", "Jane Smith"));
     }
@@ -117,7 +118,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(2)) // Speech1 and Speech2 from seed data are within this date range
                 .body("data.author", hasItems("John Doe", "Jane Smith"));
     }
@@ -132,7 +133,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(2)) // Assert that 2 results were returned
                 .body("data.content", hasItems("Human rights are non-negotiable", "Economic stability is key to peace"));
     }
@@ -148,7 +149,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(1)) // Assert that 2 results were returned
                 .body("data[0].content", is("Economic stability is key to peace"))
                 .body("data[0].author", is("John Doe"))
@@ -169,7 +170,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data.size()", is(1)) // Only one speech matches both criteria
                 .body("data[0].author", is("John Doe"))
                 .body("data[0].content", is("Equality and justice for all"))
@@ -252,7 +253,7 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speech retrieved successfully"))
+                .body("message", is("Speech/es retrieved successfully"))
                 .body("data.id", is(1))
                 .body("data.content", is("Equality and justice for all"))
                 .body("data.author", is("John Doe"))
@@ -409,11 +410,60 @@ class SpeechControllerIntegrationTest {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("status", is(200))
-                .body("message", is("Speeches retrieved successfully"))
+                .body("message", is(SPEECHES_RETRIEVED))
                 .body("data", is(notNullValue()))
                 .body("data.size()", greaterThan(0))
                 .body("data[0].author", is(notNullValue()))
                 .body("data[0].content", is(notNullValue()))
                 .body("data[0].speechDate", is(notNullValue()));
+    }
+
+    @Test
+    void shouldReturnConflictWhenCreatingDuplicateSpeech() {
+        String duplicateRequestBody = """
+                {
+                    "content": "Equality and justice for all",
+                    "author": "John Doe",
+                    "keywords": ["equality", "justice"],
+                    "speechDate": "2023-01-01T10:00:00Z"
+                }
+            """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(duplicateRequestBody).log().all()
+                .when()
+                .post("/api/speeches")
+                .then()
+                .log().all()
+                .statusCode(409)
+                .contentType(ContentType.JSON)
+                .body("status", is(409))
+                .body("message", containsString("A speech with the same content, author, date, and keywords already exists."));
+    }
+
+    @Test
+    void shouldReturnConflictWhenUpdatingToCreateDuplicateSpeech() {
+        String duplicateUpdateRequestBody = """
+                {
+                    "id": 2,
+                    "content": "Equality and justice for all",
+                    "author": "John Doe",
+                    "keywords": ["equality", "justice"],
+                    "speechDate": "2023-01-01T10:00:00Z"
+                }
+            """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(duplicateUpdateRequestBody).log().all()
+                .when()
+                .put("/api/speeches/{id}", 2)
+                .then()
+                .log().all()
+                .statusCode(409)
+                .contentType(ContentType.JSON)
+                .body("status", is(409))
+                .body("message", containsString("A speech with the same content, author, date, and keywords already exists."));
     }
 }

@@ -1,13 +1,13 @@
 package tech.challenge.speech.repository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import tech.challenge.speech.model.entity.Speech;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -16,47 +16,59 @@ public class SpeechSpecification {
 
     private static final String WILDCARD = "%";
 
-    public static Specification<Speech> filterSpeeches(String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
-        return (speech, query, builder) -> {
-            List<Predicate> predicates = Stream.of(
-                            buildAuthorPredicate(author, speech, builder),
-                            buildSnippetPredicate(snippet, speech, builder),
-                            buildKeywordsPredicate(keywords, speech, builder),
-                            buildDateRangePredicate(startDate, endDate, speech, builder)
-                    )
-                    .filter(Objects::nonNull) // Ignore null predicates
-                    .toList();
+    public static Specification<Speech> checkForDuplicate(Speech speech) {
 
-            return builder.and(predicates.toArray(new Predicate[0]));
+        return (root, query, builder) -> {
+            Predicate[] predicates = Stream.of(
+                            StringUtils.isNotBlank(speech.getAuthor())
+                                    ? builder.equal(builder.lower(root.get("author")), speech.getAuthor().toLowerCase())
+                                    : null,
+                            StringUtils.isNotBlank(speech.getContent())
+                                    ? builder.equal(builder.lower(root.get("content")), speech.getContent().toLowerCase())
+                                    : null,
+                            Objects.nonNull(speech.getSpeechDate())
+                                    ? builder.equal(root.get("speechDate"), speech.getSpeechDate())
+                                    : null,
+                            CollectionUtils.isNotEmpty(speech.getKeywords())
+                                    ? builder.equal(builder.size(root.get("keywords")), speech.getKeywords().size())
+                                    : null,
+                            CollectionUtils.isNotEmpty(speech.getKeywords())
+                                    ? builder.and(
+                                    CollectionUtils.emptyIfNull(speech.getKeywords()).stream()
+                                            .map(keyword -> builder.isMember(keyword, root.get("keywords")))
+                                            .toArray(Predicate[]::new))
+                                    : null)
+                    .filter(Objects::nonNull)
+                    .toArray(Predicate[]::new);
+
+            return builder.and(predicates);
         };
     }
 
-    private static Predicate buildAuthorPredicate(String author, Root<Speech> speech, CriteriaBuilder builder) {
-        return author != null
-                ? builder.like(builder.upper(speech.get("author")), author.toUpperCase() + WILDCARD)
-                : null;
+    public static Specification<Speech> filterSpeeches(
+            String author, String snippet, OffsetDateTime startDate, OffsetDateTime endDate, Set<String> keywords) {
+
+        return (speech, query, builder) -> {
+            Predicate[] predicates = Stream.of(
+                            StringUtils.isNotBlank(author)
+                                    ? builder.like(builder.lower(speech.get("author")), author.toLowerCase() + WILDCARD)
+                                    : null,
+                            StringUtils.isNotBlank(snippet)
+                                    ? builder.like(builder.lower(speech.get("content")), WILDCARD + snippet.toLowerCase() + WILDCARD)
+                                    : null,
+                            CollectionUtils.isNotEmpty(keywords)
+                                    ? builder.or(keywords.stream()
+                                    .map(keyword -> builder.isMember(keyword, speech.get("keywords")))
+                                    .toArray(Predicate[]::new))
+                                    : null,
+                            ObjectUtils.allNotNull(startDate, endDate)
+                                    ? builder.between(speech.get("speechDate"), startDate, endDate)
+                                    : null)
+                    .filter(Objects::nonNull)
+                    .toArray(Predicate[]::new);
+
+            return builder.and(predicates);
+        };
     }
 
-    private static Predicate buildSnippetPredicate(String snippet, Root<Speech> speech, CriteriaBuilder builder) {
-        return snippet != null
-                ? builder.like(builder.upper(speech.get("content")), WILDCARD + snippet.toUpperCase() + WILDCARD)
-                : null;
-    }
-
-    private static Predicate buildKeywordsPredicate(Set<String> keywords, Root<Speech> speech, CriteriaBuilder builder) {
-        if (keywords == null || keywords.isEmpty()) {
-            return null;
-        }
-        return builder.or(
-                keywords.stream()
-                        .map(keyword -> builder.isMember(keyword, speech.get("keywords")))
-                        .toArray(Predicate[]::new)
-        );
-    }
-
-    private static Predicate buildDateRangePredicate(OffsetDateTime startDate, OffsetDateTime endDate, Root<Speech> speech, CriteriaBuilder builder) {
-        return (startDate != null && endDate != null)
-                ? builder.between(speech.get("speechDate"), startDate, endDate)
-                : null;
-    }
 }

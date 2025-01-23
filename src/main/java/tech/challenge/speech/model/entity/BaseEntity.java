@@ -3,6 +3,7 @@ package tech.challenge.speech.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +13,7 @@ import java.time.ZoneOffset;
 
 @Getter
 @Setter
+@ToString
 @MappedSuperclass
 public abstract class BaseEntity implements Serializable {
 

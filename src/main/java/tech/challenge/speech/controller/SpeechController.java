@@ -15,6 +15,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static tech.challenge.speech.common.Constants.*;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/speeches")
@@ -25,26 +27,16 @@ public class SpeechController {
 
     @GetMapping
     public ResponseEntity<ApiResponseWrapper<List<SpeechDTO>>> getAllSpeeches() {
-        List<SpeechDTO> speeches = speechService.getAllSpeeches();
-        log.info("Found {} speech/es.", speeches.size());
-        return ResponseEntity.ok(new ApiResponseWrapper<>(
-                HttpStatus.OK.value(),
-                "Speeches retrieved successfully",
-                speeches,
-                null
-        ));
+        List<SpeechDTO> allSpeeches = speechService.getAllSpeeches();
+        log.info("Found {} speech/es.", allSpeeches.size());
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, allSpeeches);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<SpeechDTO>> getSpeechById(@PathVariable Long id) {
         SpeechDTO speech = speechService.getSpeechById(id);
-        log.info("Fetched speech with ID: {}", speech.getId());
-        return ResponseEntity.ok(new ApiResponseWrapper<>(
-                HttpStatus.OK.value(),
-                "Speech retrieved successfully",
-                speech,
-                null
-        ));
+        log.info("Fetched speech with ID: {}", id);
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, speech);
     }
 
     @GetMapping("/search")
@@ -57,62 +49,36 @@ public class SpeechController {
     ) {
         List<SpeechDTO> speeches = speechService.searchSpeeches(author, snippet, startDate, endDate, keywords);
         log.info("Found {} speech/es.", speeches.size());
-        return ResponseEntity.ok(new ApiResponseWrapper<>(
-                HttpStatus.OK.value(),
-                "Speeches retrieved successfully",
-                speeches,
-                null));
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, speeches);
     }
 
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<SpeechDTO>> createSpeech(@Valid @RequestBody SpeechDTO speechDTO) {
-        SpeechDTO savedDTO = speechService.saveSpeech(speechDTO);
-        log.info("Created new speech with ID: {}", savedDTO.getId());
-        return new ResponseEntity<>(new ApiResponseWrapper<>(
-                HttpStatus.CREATED.value(),
-                "Speech created successfully",
-                savedDTO,
-                null),
-                HttpStatus.CREATED);
+        SpeechDTO createdSpeech = speechService.saveSpeech(speechDTO);
+        log.info("Created new speech with ID: {}", createdSpeech.getId());
+        return buildResponse(HttpStatus.CREATED, SPEECH_CREATED, createdSpeech);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<SpeechDTO>> updateSpeech(
             @PathVariable Long id, @Valid @RequestBody UpdateSpeechDTO updateSpeechDTO) {
-
-        // Check if the path ID matches the body ID
         if (!id.equals(updateSpeechDTO.getId())) {
             log.warn("Conflict: Path ID ({}) does not match request body ID ({}).", id, updateSpeechDTO.getId());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    new ApiResponseWrapper<>(
-                            HttpStatus.CONFLICT.value(),
-                            "Conflict: ID in path does not match ID in request body",
-                            null,
-                            null
-                    )
-            );
+            return buildResponse(HttpStatus.CONFLICT, ID_CONFLICT_MESSAGE, null);
         }
-
         SpeechDTO updatedSpeech = speechService.updateSpeech(id, updateSpeechDTO);
         log.info("Updated speech with ID: {}", id);
-        return ResponseEntity.ok(
-                new ApiResponseWrapper<>(
-                        HttpStatus.OK.value(),
-                        "Speech updated successfully",
-                        updatedSpeech,
-                        null
-                )
-        );
+        return buildResponse(HttpStatus.OK, SPEECH_UPDATED, updatedSpeech);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<Void>> deleteSpeech(@PathVariable Long id) {
         speechService.deleteSpeech(id);
         log.info("Deleted speech with ID: {}", id);
-        return ResponseEntity.ok(new ApiResponseWrapper<>(
-                HttpStatus.OK.value(),
-                "Speech deleted successfully",
-                null,
-                null));
+        return buildResponse(HttpStatus.OK, SPEECH_DELETED, null);
+    }
+
+    private <T> ResponseEntity<ApiResponseWrapper<T>> buildResponse(HttpStatus status, String message, T data) {
+        return ResponseEntity.status(status).body(new ApiResponseWrapper<>(status.value(), message, data, null));
     }
 }

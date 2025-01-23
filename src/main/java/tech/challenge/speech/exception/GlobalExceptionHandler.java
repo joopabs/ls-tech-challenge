@@ -32,6 +32,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(DuplicateSpeechException.class)
+    public ResponseEntity<ApiResponseWrapper<Void>> handleDuplicateSpeechException(DuplicateSpeechException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponseWrapper<>(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                null,
+                null
+        ));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponseWrapper<Void>> handleResourceNotFoundException(NotFoundException ex) {
         ApiResponseWrapper<Void> response = new ApiResponseWrapper<>(
