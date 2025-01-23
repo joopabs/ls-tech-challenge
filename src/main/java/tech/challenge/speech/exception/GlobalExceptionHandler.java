@@ -6,13 +6,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import tech.challenge.speech.common.ApiResponseBuilder;
 import tech.challenge.speech.model.dto.ApiResponseWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static tech.challenge.speech.common.ApiResponseBuilder.build;
+import static tech.challenge.speech.common.ApiResponseBuilder.buildResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,7 +24,7 @@ public class GlobalExceptionHandler {
                         : objectError.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        return build(
+        return buildResponse(
                 HttpStatus.BAD_REQUEST,
                 "Validation failed",
                 null,
@@ -35,7 +34,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateSpeechException.class)
     public ResponseEntity<ApiResponseWrapper<Void>> handleDuplicateSpeechException(DuplicateSpeechException ex) {
-        return ApiResponseBuilder.build(
+        return buildResponse(
                 HttpStatus.CONFLICT,
                 ex.getMessage(),
                 null
@@ -44,7 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponseWrapper<Void>> handleResourceNotFoundException(NotFoundException ex) {
-        return ApiResponseBuilder.build(
+        return buildResponse(
                 HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 null
@@ -53,7 +52,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseWrapper<Object>> handleGeneralException(Exception ex) {
-        return build(
+        return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal server error",
                 null,

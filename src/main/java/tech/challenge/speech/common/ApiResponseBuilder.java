@@ -10,12 +10,12 @@ import java.util.List;
 @UtilityClass
 public class ApiResponseBuilder {
 
-    public <T> ResponseEntity<ApiResponseWrapper<T>> build(HttpStatus status, String message, T data, List<String> errors) {
+    public <T> ResponseEntity<ApiResponseWrapper<T>> buildResponse(HttpStatus status, String message, T data, List<String> errors) {
         ApiResponseWrapper<T> response = new ApiResponseWrapper<>(status.value(), message, data, errors);
         return ResponseEntity.status(status).body(response);
     }
 
-    public <T> ResponseEntity<ApiResponseWrapper<T>> build(HttpStatus status, String message, T data) {
-        return build(status, message, data, null);
+    public <T> ResponseEntity<ApiResponseWrapper<T>> buildResponse(HttpStatus status, String message, T data) {
+        return buildResponse(status, message, data, null);
     }
 }

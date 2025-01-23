@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.challenge.speech.common.ApiResponseBuilder;
 import tech.challenge.speech.model.dto.ApiResponseWrapper;
 import tech.challenge.speech.model.dto.SpeechDTO;
 import tech.challenge.speech.model.dto.UpdateSpeechDTO;
@@ -16,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static tech.challenge.speech.common.ApiResponseBuilder.buildResponse;
 import static tech.challenge.speech.common.Constants.*;
 
 @Slf4j
@@ -30,14 +30,14 @@ public class SpeechController {
     public ResponseEntity<ApiResponseWrapper<List<SpeechDTO>>> getAllSpeeches() {
         List<SpeechDTO> allSpeeches = speechService.getAllSpeeches();
         log.info("Found {} speech/es.", allSpeeches.size());
-        return ApiResponseBuilder.build(HttpStatus.OK, SPEECHES_RETRIEVED, allSpeeches);
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, allSpeeches);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<SpeechDTO>> getSpeechById(@PathVariable Long id) {
         SpeechDTO speech = speechService.getSpeechById(id);
         log.info("Fetched speech with ID: {}", id);
-        return ApiResponseBuilder.build(HttpStatus.OK, SPEECHES_RETRIEVED, speech);
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, speech);
     }
 
     @GetMapping("/search")
@@ -50,14 +50,14 @@ public class SpeechController {
     ) {
         List<SpeechDTO> speeches = speechService.searchSpeeches(author, snippet, startDate, endDate, keywords);
         log.info("Found {} speech/es.", speeches.size());
-        return ApiResponseBuilder.build(HttpStatus.OK, SPEECHES_RETRIEVED, speeches);
+        return buildResponse(HttpStatus.OK, SPEECHES_RETRIEVED, speeches);
     }
 
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<SpeechDTO>> createSpeech(@Valid @RequestBody SpeechDTO speechDTO) {
         SpeechDTO createdSpeech = speechService.saveSpeech(speechDTO);
         log.info("Created new speech with ID: {}", createdSpeech.getId());
-        return ApiResponseBuilder.build(HttpStatus.CREATED, SPEECH_CREATED, createdSpeech);
+        return buildResponse(HttpStatus.CREATED, SPEECH_CREATED, createdSpeech);
     }
 
     @PutMapping("/{id}")
@@ -65,17 +65,17 @@ public class SpeechController {
             @PathVariable Long id, @Valid @RequestBody UpdateSpeechDTO updateSpeechDTO) {
         if (!id.equals(updateSpeechDTO.getId())) {
             log.warn("Conflict: Path ID ({}) does not match request body ID ({}).", id, updateSpeechDTO.getId());
-            return ApiResponseBuilder.build(HttpStatus.CONFLICT, ID_CONFLICT_MESSAGE, null);
+            return buildResponse(HttpStatus.CONFLICT, ID_CONFLICT_MESSAGE, null);
         }
         SpeechDTO updatedSpeech = speechService.updateSpeech(id, updateSpeechDTO);
         log.info("Updated speech with ID: {}", id);
-        return ApiResponseBuilder.build(HttpStatus.OK, SPEECH_UPDATED, updatedSpeech);
+        return buildResponse(HttpStatus.OK, SPEECH_UPDATED, updatedSpeech);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<Void>> deleteSpeech(@PathVariable Long id) {
         speechService.deleteSpeech(id);
         log.info("Deleted speech with ID: {}", id);
-        return ApiResponseBuilder.build(HttpStatus.OK, SPEECH_DELETED, null);
+        return buildResponse(HttpStatus.OK, SPEECH_DELETED, null);
     }
 }
