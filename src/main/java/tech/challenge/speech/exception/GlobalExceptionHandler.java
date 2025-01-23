@@ -6,10 +6,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import tech.challenge.speech.common.ApiResponseBuilder;
 import tech.challenge.speech.model.dto.ApiResponseWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static tech.challenge.speech.common.ApiResponseBuilder.build;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,47 +25,39 @@ public class GlobalExceptionHandler {
                         : objectError.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        ApiResponseWrapper<Object> response = new ApiResponseWrapper<>(
-                HttpStatus.BAD_REQUEST.value(),
+        return build(
+                HttpStatus.BAD_REQUEST,
                 "Validation failed",
                 null,
                 errors
         );
-
-        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(DuplicateSpeechException.class)
     public ResponseEntity<ApiResponseWrapper<Void>> handleDuplicateSpeechException(DuplicateSpeechException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponseWrapper<>(
-                HttpStatus.CONFLICT.value(),
+        return ApiResponseBuilder.build(
+                HttpStatus.CONFLICT,
                 ex.getMessage(),
-                null,
                 null
-        ));
+        );
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponseWrapper<Void>> handleResourceNotFoundException(NotFoundException ex) {
-        ApiResponseWrapper<Void> response = new ApiResponseWrapper<>(
-                HttpStatus.NOT_FOUND.value(),
+        return ApiResponseBuilder.build(
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
-                null,
                 null
         );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseWrapper<Object>> handleGeneralException(Exception ex) {
-        ApiResponseWrapper<Object> response = new ApiResponseWrapper<>(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        return build(
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal server error",
                 null,
                 List.of(ex.getMessage())
         );
-
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 }
